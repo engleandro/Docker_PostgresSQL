@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  
+  postgres:
+    container_name: sql_postgres
+    image: postgres #:alpine
+    #build:
+    # context: ./Dockerfiles
+    # Dockerfile: Dockerfile-postgres
+    restart: always
+    #expose: 8080
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Mandatory
+      POSTGRES_DB: ${POSTGRES_DB}
+      #POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS}
+      #POSTGRES_INITDB_WALDIR: ${POSTGRES_INITDB_WALDIR}
+      #POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
+      #PGDATA: ${PGDATA}
+    networks: ["server"]
+    #depends_on:
+    #  - adminer
+    volumes:
+      - sql_postgres:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    networks:
+      - client
+      - server
+      - services
+      - pipeline
+    ports:
+      - 8080:8080
+
+volumes:
+  sql_postgres:
+
+networks:
+  client:
+  server:
+  services:
+  pipeline:
