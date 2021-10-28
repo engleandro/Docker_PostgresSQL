@@ -3,13 +3,25 @@ version: '3'
 services:
   
   postgres:
-    container_name: sql_postgres
-    image: postgres #:alpine
+    container_name: postgres_sql
+    image: postgres:alpine
     #build:
-    # context: ./Dockerfiles
-    # Dockerfile: Dockerfile-postgres
-    restart: always
-    #expose: 8080
+    # context: ./Dockerfiles/
+    # dockerfile: Dockerfile-PostgresSQL
+    # args:
+    #   parameter: hello world
+    # #on Docker: ARG parameter; echo "$parameter"
+    # cache_from:
+    #  - alpine:latest
+    #  - corp/web_app:3.14
+    # network: host
+    # target: prod
+    # shm_size: '2gb' || 1000000
+    # labels:
+    #  com.example.description: "Database volume"
+    # cgroup_parent: m-executor-abcd
+    # command: bundle exec thin -p 3000
+    # command: ["bundle", "exec", "thin", "-p", "3000"]
     env_file: .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -19,28 +31,101 @@ services:
       #POSTGRES_INITDB_WALDIR: ${POSTGRES_INITDB_WALDIR}
       #POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
       #PGDATA: ${PGDATA}
-    networks: ["server"]
+    expose:
+      - "8080"
+      - "8081"
+    volumes:
+      - type: volume
+        source: PostgresDB
+        target: /var/lib/postgresql/data
+        volume:
+          nocopy: true
+      #- PostgresDB:/var/lib/postgresql/data
+    #restart: "no" # DEFAULT
+    #restart: always
+    #restart: on-failure
+    restart: unless-stopped
+    #deploy:
+    #  #replicas: 2
+    #  #update_config:
+    #  #  parallelism: 2
+    #  #  delay: 10s
+    #  #  order: stop-first
+    #  #resources:
+    #  #  limits:
+    #  #    cpus: '0.50'
+    #  #    memory: 50M
+    #  #  reservations:
+    #  #    cpus: '0.25'
+    #  #    memory: 20M
+    #  #restart_policy:
+    #  #  condition: on-failure
+    #  #  delay: 5s
+    #  #  max_attempts: 3
+    #  #  window: 120s
+    #networks:
+    #  - server
     #depends_on:
     #  - adminer
-    volumes:
-      - sql_postgres:/var/lib/postgresql/data
+    #links:
+    #  - 
+    entrypoint: /entrypoint.sh
+    #entrypoint: ["php", "-d", "memory_limit=-1", "vendor/bin/phpunit"]
+    #user: postgresql
+    #working_dir: /code
+    #domainname: foo.com
+    #hostname: foo
+    #ipc: host
+    #mac_address: 02:42:ac:11:65:43
+    #privileged: true
+    #read_only: true
+    #shm_size: 64M
+    #stdin_open: true
+    #tty: true
 
   adminer:
     image: adminer
     restart: always
-    networks:
-      - client
-      - server
-      - services
-      - pipeline
+    links:
+      - postgres
     ports:
-      - 8080:8080
+      - "8080:8080"
+    #networks:
+    #  - client
+    #  - server
+    #  - services
+    #  - pipeline
+
 
 volumes:
-  sql_postgres:
+  PostgresData:
+#    name: my-app-data
+#    external: true
+#    driver_opts:
+#      type: "nfs"
+#      o: "addr=10.40.0.199,nolock,soft,rw"
+#      device: ":/docker/example
 
-networks:
-  client:
-  server:
-  services:
-  pipeline:
+#networks:
+#  client:
+#  server:
+#     network_code: "bridge"
+#     network_mode: "host"
+#     network_mode: "service:[service name]"
+#     network_mode: "container:[container name/id]"
+#  services:
+#  pipeline:
+
+#logging:
+#  driver: "json-file"
+#  options:
+#    syslog-address: "tcp://192.168.0.42:123"
+#    max-size: "200k"
+#    max-file: "10"
+
+#healthcheck:
+#  test: ["CMD", "curl", "-f", "http://localhost"]
+#  interval: 1m30s
+#  timeout: 10s
+#  retries: 3
+#  start_period: 40s
