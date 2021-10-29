@@ -1,15 +1,49 @@
 version: '3'
 
 services:
+
+  adminer:
+    image: adminer
+    restart: always
+    links:
+      - postgres
+    ports:
+      - "2000:2000"
+    env_file: .env
+    environment:
+      - ADMINER_DESIGN="dracula"
+    # https://github.com/vrana/adminer/tree/master/designs
   
   postgres:
-    container_name: postgres_sql
-    image: postgres:alpine
+    container_name: postgres
+    image: postgres:alpine3.14
+    env_file: .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      #POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS}
+      #POSTGRES_INITDB_WALDIR: ${POSTGRES_INITDB_WALDIR}
+      #POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
+      #PGDATA: ${PGDATA}
+    volumes:
+      - type: volume
+        source: Databases
+        target: /var/lib/postgresql/data
+        volume:
+          nocopy: true
+    restart: always
+
+volumes:
+  Databases:
+
+
+#  #service-name:
     #build:
     # context: ./Dockerfiles/
-    # dockerfile: Dockerfile-PostgresSQL
+    # dockerfile: Dockerfile
     # args:
-    #   parameter: hello world
+    #   parameter: "hello world"
     # #on Docker: ARG parameter; echo "$parameter"
     # cache_from:
     #  - alpine:latest
@@ -22,29 +56,11 @@ services:
     # cgroup_parent: m-executor-abcd
     # command: bundle exec thin -p 3000
     # command: ["bundle", "exec", "thin", "-p", "3000"]
-    env_file: .env
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD} # Mandatory
-      POSTGRES_DB: ${POSTGRES_DB}
-      #POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS}
-      #POSTGRES_INITDB_WALDIR: ${POSTGRES_INITDB_WALDIR}
-      #POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
-      #PGDATA: ${PGDATA}
-    expose:
-      - "8080"
-      - "8081"
-    volumes:
-      - type: volume
-        source: PostgresDB
-        target: /var/lib/postgresql/data
-        volume:
-          nocopy: true
-      #- PostgresDB:/var/lib/postgresql/data
+    #volumes:
+    #  - PostgresDB:/var/lib/postgresql/data
     #restart: "no" # DEFAULT
     #restart: always
     #restart: on-failure
-    restart: unless-stopped
     #deploy:
     #  #replicas: 2
     #  #update_config:
@@ -69,7 +85,7 @@ services:
     #  - adminer
     #links:
     #  - 
-    entrypoint: /entrypoint.sh
+    #entrypoint: /entrypoint.sh
     #entrypoint: ["php", "-d", "memory_limit=-1", "vendor/bin/phpunit"]
     #user: postgresql
     #working_dir: /code
@@ -83,22 +99,9 @@ services:
     #stdin_open: true
     #tty: true
 
-  adminer:
-    image: adminer
-    restart: always
-    links:
-      - postgres
-    ports:
-      - "8080:8080"
-    #networks:
-    #  - client
-    #  - server
-    #  - services
-    #  - pipeline
+#volumes:
+#  Databases:
 
-
-volumes:
-  PostgresData:
 #    name: my-app-data
 #    external: true
 #    driver_opts:
