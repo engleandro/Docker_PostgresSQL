@@ -1,23 +1,28 @@
 version: '3'
-
 services:
-
   adminer:
-    image: adminer
+    container_name: adminer
+    image: adminer:4.8.1
     restart: always
-    links:
-      - postgres
     ports:
       - "2000:2000"
-    env_file: .env
-    environment:
-      - ADMINER_DESIGN="dracula"
-    # https://github.com/vrana/adminer/tree/master/designs
-  
+    #env_file: .env
+    #links:
+    #  - postgres
+    #environment:
+    #  - ADMINER_DEFAULT_SERVER="postgres"
+    #  - ADMINER_PLUGINS="login-servers"  # https://github.com/vrana/adminer/tree/master/plugins
+    #  - ADMINER_DESIGN="dracula"         # https://github.com/vrana/adminer/tree/master/designs
   postgres:
     container_name: postgres
     image: postgres:alpine3.14
+    restart: always
+    ports:
+      - "5432:5432"
     env_file: .env
+    command: export POSTGRES_USER=${POSTGRES_USER}
+    command: export POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    command: export POSTGRES_DB=${POSTGRES_DB}
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -32,10 +37,27 @@ services:
         target: /var/lib/postgresql/data
         volume:
           nocopy: true
-    restart: always
+  #mysql:
+  #    image: mysql:8.0.3
+  #    restart: always
+  #    ports:
+  #        - 3306:3306
+  #    environment:
+  #        MYSQL_ROOT_PASSWORD: changeme
+  #        MYSQL_DATABASE: mydb
+  #mongo:
+  #    image: mongo:3.6.2
+  #    restart: always
+  #    ports:
+  #        - 27017:27017
+  #    environment:
+  #        MONGO_INITDB_ROOT_USERNAME: root
+  #        MONGO_INITDB_ROOT_PASSWORD: changeme
+
 
 volumes:
   Databases:
+
 
 
 #  #service-name:
